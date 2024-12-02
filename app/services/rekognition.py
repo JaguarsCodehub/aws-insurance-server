@@ -11,9 +11,25 @@ class RekognitionService:
             aws_secret_access_key=AWS_SECRET_ACCESS_KEY
         )
         self.bucket = S3_BUCKET
+        self.s3_client = boto3.client(
+            's3',
+            region_name=AWS_DEFAULT_REGION,
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+        )
 
     def analyze_car_image(self, image_key: str) -> Dict[str, Any]:
         try:
+            # Verify S3 object exists first
+            try:
+                self.s3_client.head_object(
+                    Bucket=self.bucket,
+                    Key=image_key
+                )
+            except Exception as e:
+                print(f"S3 object check failed: {str(e)}")
+                raise Exception(f"Image not found in S3: {image_key}")
+
             # Detect labels
             label_response = self.client.detect_labels(
                 Image={
@@ -118,6 +134,7 @@ class RekognitionService:
             }
 
         except Exception as e:
+            print(f"Full error in analyze_car_image: {str(e)}")
             raise Exception(f"Failed to analyze image: {str(e)}")
 
     def detect_text_in_image(self, image_key: str) -> Dict[str, Any]:

@@ -12,6 +12,13 @@ class S3Service:
             aws_secret_access_key=AWS_SECRET_ACCESS_KEY
         )
         self.bucket = S3_BUCKET
+        
+        # Verify bucket exists and is accessible
+        try:
+            self.s3_client.head_bucket(Bucket=self.bucket)
+        except Exception as e:
+            print(f"S3 bucket check failed: {str(e)}")
+            raise Exception(f"S3 bucket {self.bucket} is not accessible")
 
     async def upload_file(self, file: UploadFile, key: str = None) -> str:
         try:
