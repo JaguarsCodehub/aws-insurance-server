@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from app.utils.calculate_quote import calculate_quote
 from app.services.dynamo import save_quote_to_dynamo, get_quotes_from_dynamo
 import os
+from insuranceutils import calculate_premium
 
 router = APIRouter()
 
@@ -37,6 +38,7 @@ async def generate_quote(quote_request: QuoteRequest):
     try:
         print(f"Request received: {quote_request.dict()}")
         
+        # Calculate premium using insuranceutils
         premium = calculate_quote(
             quote_request.carMake,
             quote_request.carModel,
